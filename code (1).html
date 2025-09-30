@@ -1,0 +1,3134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chery Arta - Modern Service Booking</title>
+    
+    <!-- External Libraries -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+  apiKey: "AIzaSyBMJp4ktfl-bZaMDNuAhvDQPGRI15X1Jk4",
+  authDomain: "chery-booking-service-e1172.firebaseapp.com",
+  databaseURL: "https://chery-booking-service-e1172-default-rtdb.firebaseio.com",
+  projectId: "chery-booking-service-e1172",
+  storageBucket: "chery-booking-service-e1172.firebasestorage.app",
+  messagingSenderId: "854480144755",
+  appId: "1:854480144755:web:1271daecf6f97b7efd1d06",
+  measurementId: "G-HHFPYJXPH0"
+};
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Make Firebase available globally
+        window.db = db;
+        window.auth = auth;
+        window.firebaseModules = {
+            collection, addDoc, getDocs, deleteDoc, doc, updateDoc,
+            signInWithEmailAndPassword, onAuthStateChanged, signOut
+        };
+    </script>
+
+    <style>
+        :root {
+            --chery-blue: #1e3a8a;
+            --chery-red: #dc2626;
+            --chery-gold: #fbbf24;
+            --chery-pink: #ec4899;
+            --chery-white: #ffffff;
+            --chery-gray: #f8fafc;
+            --chery-dark: #1e293b;
+            --chery-text-dark: #232323;
+            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            --shadow-heavy: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --gradient-primary: linear-gradient(135deg, var(--chery-blue) 0%, var(--chery-red) 100%);
+            --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--chery-dark);
+            overflow-x: hidden;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Header Sticky dengan Animasi */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .header.scrolled {
+            padding: 0.5rem 0;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--chery-dark);
+            font-weight: 500;
+            position: relative;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+        }
+
+        .nav-link:hover {
+            color: var(--chery-blue);
+            background: rgba(30, 58, 138, 0.1);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 80%;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--chery-dark);
+            cursor: pointer;
+        }
+
+        /* Hero Section dengan Gradient dan Animasi */
+        .hero {
+            min-height: 100vh;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            /* offset fixed header so first title line is visible */
+            padding-top: 9rem;
+            padding-bottom: 4rem;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(255,255,255,0.1)" points="0,1000 1000,800 1000,1000"/></svg>');
+            background-size: cover;
+        }
+
+        .hero-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7rem;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--chery-white);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        /* Hero two-line title to match design */
+        .hero-content .hero-title-top,
+        .hero-content .hero-title-bottom {
+            font-size: clamp(2.2rem, 6vw, 4.5rem);
+            font-weight: 800;
+            color: var(--chery-white);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin: 0;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.25);
+        }
+        .hero-content .hero-title-bottom {
+            margin-top: 0.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .hero-description {
+            max-width: 560px;
+            line-height: 1.7;
+        }
+        .hero-content {
+            max-width: 620px;
+            justify-self: start;
+        }
+        /* controlled desktop-only line break in hero headline */
+        br.hero-break { display: none; }
+        @media (min-width: 1200px) {
+            br.hero-break { display: initial; }
+        }
+
+        .hero-content p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--chery-gold);
+            color: var(--chery-dark);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-heavy);
+            background: #fcd34d;
+        }
+
+        .hero-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            justify-self: end; /* align the image column to the right */
+        }
+
+        .hero-car {
+            width: 100%;
+            max-width: 480px;
+            height: auto;
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
+            animation: float 3s ease-in-out infinite;
+            margin-top: 8px; /* slight lower to align with heading visually */
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Slider Fasilitas dengan Efek 3D */
+        .facilities {
+            padding: 5rem 0;
+            background: var(--chery-gray);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--chery-dark);
+            margin-bottom: 3rem;
+        }
+
+        .facilities-slider {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        .slider-container {
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .slider-track {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .facility-card {
+            min-width: 100%;
+            position: relative;
+            height: 500px;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .facility-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.1) 100%);
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .facility-card:hover::before {
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.05) 100%);
+        }
+
+        .facility-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: transform 0.3s ease;
+        }
+
+        .facility-card:hover .facility-image {
+            transform: scale(1.05);
+        }
+
+        .facility-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 2rem;
+            color: var(--chery-white);
+            z-index: 3;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .facility-card:hover .facility-caption {
+            transform: translateY(0);
+        }
+
+        .facility-caption h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .facility-caption p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            line-height: 1.5;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .slider-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            background: var(--chery-white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-light);
+            color: var(--chery-blue);
+            font-size: 1.2rem;
+        }
+
+        .slider-btn:hover {
+            background: var(--chery-blue);
+            color: var(--chery-white);
+            transform: scale(1.1);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .slider-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(30, 58, 138, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: var(--chery-blue);
+            transform: scale(1.3);
+        }
+
+        .indicator:hover {
+            background: var(--chery-red);
+            transform: scale(1.2);
+        }
+
+        /* Modal Preview untuk Gambar */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .image-modal.show {
+            display: flex;
+        }
+
+        .modal-image-container {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 15px;
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .modal-caption {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            margin-top: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-caption h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--chery-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-caption p {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .close-modal-btn {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            background: var(--chery-white);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--chery-dark);
+            transition: all 0.3s ease;
+        }
+
+        .close-modal-btn:hover {
+            background: var(--chery-red);
+            color: var(--chery-white);
+            transform: scale(1.1);
+        }
+
+        .modal-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--chery-dark);
+            transition: all 0.3s ease;
+        }
+
+        .modal-nav-btn:hover {
+            background: var(--chery-blue);
+            color: var(--chery-white);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .modal-prev {
+            left: -80px;
+        }
+
+        .modal-next {
+            right: -80px;
+        }
+
+        /* Form Booking dengan Glassmorphism */
+        .booking {
+            padding: 5rem 0;
+            background: var(--gradient-primary);
+            position: relative;
+        }
+
+        .booking-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .booking-card {
+            background: var(--gradient-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 3rem;
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .booking-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--chery-white);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--chery-white);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ========== REGULAR INPUT FIELDS (UNCHANGED) ========== */
+        .form-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--chery-white);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--chery-gold);
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Container untuk input Plat Nomor */
+.plat-nomor-input-container {
+    display: flex;
+    align-items: center; /* Membuat input dan tanda '-' sejajar vertikal */
+    gap: 5px; /* Memberi jarak default antara elemen */
+}
+
+/* Styling umum untuk semua kotak input plat */
+.plat-nomor-input-container .input-box {
+    text-align: center;
+    font-size: 18px; /* Ukuran font lebih besar */
+    font-weight: bold;
+    padding: 8px 5px;
+    border: 1px solid #ccc; /* Border abu-abu */
+    border-radius: 4px; /* Sudut membulat */
+    /* Opsional: Efek kotak yang lebih tegas */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); 
+    height: 40px; /* Tinggi kotak */
+    box-sizing: border-box; /* Agar padding tidak menambah lebar total */
+    background: rgba(255, 255, 255, 0.1); /* Mengikuti gaya form-input */
+    color: var(--chery-white); /* Mengikuti gaya form-input */
+    transition: all 0.3s ease; /* Transisi untuk fokus */
+}
+
+.plat-nomor-input-container .input-box:focus {
+    outline: none;
+    border-color: var(--chery-gold); /* Mengikuti gaya form-input fokus */
+    background: rgba(255, 255, 255, 0.15); /* Mengikuti gaya form-input fokus */
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Lebar spesifik untuk setiap bagian */
+.plat-part-a {
+    width: 50px; /* Cukup untuk 1-2 huruf */
+}
+
+.plat-part-b {
+    width: 80px; /* Cukup untuk 4 angka */
+}
+
+.plat-part-c {
+    width: 70px; /* Cukup untuk 2-3 huruf */
+}
+
+/* Styling untuk tanda pemisah (-) */
+.plat-nomor-input-container .separator {
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--chery-white); /* Mengikuti warna teks form */
+}
+
+/* Opsional: Styling label agar terlihat seperti di gambar */
+.plat-nomor-group .form-label {
+    color: var(--chery-white); /* Memastikan label berwarna putih */
+}
+
+        /* ========== MODIFIED BOXES - SAMA PERSIS SEPERTI EMAIL BOX ========== */
+        /* Email box style sebagai referensi - tidak diubah */
+        .form-input[type="Type Mobil"] {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: var(--chery-white) !important;
+            border: 2px solid rgba(255, 255, 255, 0.2) !important;
+            border-radius: 15px !important;
+        }
+
+        .form-input[type="Type Mobil"]:focus {
+            border-color: var(--chery-gold) !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+        }
+
+        /* SERVICE SELECT - SAMA PERSIS DENGAN EMAIL BOX */
+        .service-select-wrapper {
+            position: relative;
+        }
+
+        .form-input.service-select {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: var(--chery-white) !important;
+            border: 2px solid rgba(255, 255, 255, 0.2) !important;
+            border-radius: 15px !important;
+            box-shadow: none !important;
+            font-weight: 400 !important;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2rem;
+            padding-right: 3rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input.service-select:focus {
+            outline: none;
+            border-color: var(--chery-gold) !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .form-input.service-select option {
+            background-color: var(--chery-dark) !important;
+            color: white !important;
+            padding: 0.75rem 1rem !important;
+            font-weight: 400 !important;
+            border: none !important;
+            font-size: 1rem !important;
+        }
+
+        .form-input.service-select option:hover {
+            background-color: var(--chery-blue) !important;
+            color: white !important;
+        }
+
+        .form-input.service-select option:checked {
+            background-color: var(--chery-gold) !important;
+            color: var(--chery-dark) !important;
+            font-weight: 600 !important;
+        }
+
+        /* ICON UNTUK SERVICE SELECT - SAMA SEPERTI EMAIL */
+        .form-group:has(.service-select) .form-icon {
+            color: rgba(255, 255, 255, 0.7) !important;
+            opacity: 1;
+            z-index: 2;
+        }
+
+        /* DATE INPUT - SAMA PERSIS DENGAN EMAIL BOX */
+        .date-input-wrapper {
+            position: relative;
+        }
+
+        .form-input[data-date] {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: var(--chery-white) !important;
+            border: 2px solid rgba(255, 255, 255, 0.2) !important;
+            border-radius: 15px !important;
+            box-shadow: none !important;
+            font-weight: 400 !important;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-input[data-date]:focus {
+            outline: none;
+            border-color: var(--chery-gold) !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        /* ICON UNTUK DATE INPUT - SAMA SEPERTI EMAIL */
+        .form-group:has([data-date]) .form-icon {
+            color: rgba(255, 255, 255, 0.7) !important;
+            opacity: 1;
+            z-index: 2;
+        }
+
+        /* ========== CUSTOM SCROLLABLE TIME PICKER - UPDATED ========== */
+        .time-picker-wrapper {
+            position: relative;
+        }
+
+        .time-picker-display {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--chery-white);
+            font-size: 1rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-right: 3rem;
+        }
+
+        .time-picker-display:hover,
+        .time-picker-display.active {
+            border-color: var(--chery-gold);
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .time-picker-display .fa-chevron-down {
+            position: absolute;
+            right: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .time-picker-display.active .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        /* ICON UNTUK TIME PICKER - SAMA SEPERTI EMAIL */
+        .form-group:has(.time-picker-display) .form-icon {
+            color: rgba(255, 255, 255, 0.7) !important;
+            opacity: 1;
+            z-index: 2;
+        }
+
+        /* Custom Scrollable Time Picker Dropdown */
+        .time-picker-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: none;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .time-picker-dropdown.show {
+            display: block;
+            animation: dropdownSlide 0.3s ease;
+        }
+
+        @keyframes dropdownSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .time-picker-content {
+            padding: 1.5rem;
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            gap: 2rem;
+            background: white;
+        }
+
+        .time-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+        }
+
+        .time-column-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--chery-text-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .time-column-list {
+            height: 200px;
+            overflow-y: auto;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+            width: 100%;
+            scroll-behavior: smooth;
+            position: relative;
+        }
+
+        /* Custom Scrollbar */
+        .time-column-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .time-column-list::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        .time-column-list::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .time-column-list::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .time-option {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            text-align: center;
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: var(--chery-text-dark);
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            margin: 2px;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .time-option:hover {
+            background: #e2e8f0;
+            color: var(--chery-blue);
+        }
+
+        .time-option.selected {
+            background: white;
+            color: var(--chery-text-dark);
+            border: 3px solid #000000 !important;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: scale(1.02);
+        }
+
+        .time-picker-actions {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            background: #f8fafc;
+        }
+
+        .time-picker-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .time-picker-btn.cancel {
+            background: #e2e8f0;
+            color: var(--chery-text-dark);
+        }
+
+        .time-picker-btn.cancel:hover {
+            background: #cbd5e1;
+        }
+
+        .time-picker-btn.confirm {
+            background: var(--chery-blue);
+            color: white;
+        }
+
+        .time-picker-btn.confirm:hover {
+            background: #1e40af;
+        }
+
+        /* TEXTAREA SPECIFIC */
+        textarea.form-input {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+            z-index: 1;
+        }
+
+        .form-error {
+            color: #fca5a5;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-input.error {
+            border-color: #fca5a5;
+        }
+
+        .form-input.error ~ .form-error {
+            display: block;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1.25rem;
+            background: var(--chery-gold);
+            color: var(--chery-dark);
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .submit-btn:hover {
+            background: #fcd34d;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(30, 58, 138, 0.3);
+            border-top: 2px solid var(--chery-dark);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        .submit-btn.loading .loading-spinner {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* About Section */
+        .about {
+            padding: 5rem 0;
+            background: var(--chery-white);
+        }
+
+        .about-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-content h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--chery-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .about-content p {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--chery-gray);
+            border-radius: 10px;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--chery-white);
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 5rem 0;
+            background: var(--chery-gray);
+        }
+
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .contact-card {
+            background: var(--chery-white);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-light);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .contact-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--chery-white);
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            padding: 5rem 0;
+            background: var(--chery-white);
+            display: none;
+        }
+
+        .admin-panel.show {
+            display: block;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .admin-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--chery-dark);
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .admin-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .export-btn {
+            background: #22c55e;
+            color: var(--chery-white);
+        }
+
+        .export-btn:hover {
+            background: #16a34a;
+        }
+
+        .logout-btn {
+            background: var(--chery-red);
+            color: var(--chery-white);
+        }
+
+        .logout-btn:hover {
+            background: #b91c1c;
+        }
+
+        .bookings-table {
+            background: var(--chery-white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: var(--chery-blue);
+            color: var(--chery-white);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table tr:nth-child(even) {
+            background: var(--chery-gray);
+        }
+
+        .table tr:hover {
+            background: rgba(30, 58, 138, 0.05);
+        }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 0.25rem;
+        }
+
+        .edit-btn {
+            background: #3b82f6;
+            color: var(--chery-white);
+        }
+
+        .edit-btn:hover {
+            background: #2563eb;
+        }
+
+        .delete-btn {
+            background: var(--chery-red);
+            color: var(--chery-white);
+        }
+
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+
+        /* Login Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--chery-white);
+            padding: 2rem;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--chery-dark);
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            background: white !important;
+            color: var(--chery-text-dark) !important;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--chery-blue);
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--chery-blue);
+            color: var(--chery-white);
+            border: none;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn:hover {
+            background: #1e40af;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        /* Success/Error Messages */
+        .message {
+            position: fixed;
+            top: 100px;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            color: var(--chery-white);
+            font-weight: 500;
+            z-index: 1500;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+        }
+
+        .message.show {
+            transform: translateX(0);
+        }
+
+        .message.success {
+            background: #22c55e;
+        }
+
+        .message.error {
+            background: var(--chery-red);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 3rem 0 1rem;
+            background: var(--chery-dark);
+            color: var(--chery-white);
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            /* extra offset for fixed header on mobile */
+            .hero { padding-top: 7rem; }
+
+            .hero-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 2rem;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .about-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .admin-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .table {
+                font-size: 0.875rem;
+            }
+
+            .table th,
+            .table td {
+                padding: 0.5rem;
+            }
+
+            .booking-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .facility-card {
+                height: 400px;
+            }
+
+            .modal-nav-btn {
+                display: none;
+            }
+
+            .close-modal-btn {
+                top: -40px;
+                right: -10px;
+            }
+
+            /* MOBILE TIME PICKER ADJUSTMENTS */
+            .time-picker-content {
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .time-column {
+                min-width: 70px;
+            }
+
+            .time-column-list {
+                height: 160px;
+            }
+
+            .time-option {
+                padding: 0.5rem 0.75rem;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .hero-content p {
+                font-size: 1rem;
+            }
+
+            .booking-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .form-input {
+                padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            }
+
+            .submit-btn {
+                padding: 1rem;
+            }
+
+            .facility-card {
+                height: 350px;
+            }
+
+            .facility-caption {
+                padding: 1.5rem;
+            }
+
+            .facility-caption h3 {
+                font-size: 1.5rem;
+            }
+
+            .facility-caption p {
+                font-size: 1rem;
+            }
+
+            /* SMALL MOBILE TIME PICKER */
+            .time-picker-content {
+                gap: 0.5rem;
+                padding: 0.75rem;
+            }
+
+            .time-column {
+                min-width: 60px;
+            }
+
+            .time-column-list {
+                height: 140px;
+            }
+
+            .time-option {
+                padding: 0.4rem 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .time-column-label {
+                font-size: 0.75rem;
+                margin-bottom: 0.75rem;
+            }
+        }
+
+        /* Custom CSS for Booking List Table and Mode Toggle */
+        .mode-toggle {
+            margin-bottom: 15px;
+            text-align: center; /* Center the buttons */
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            margin: 0 5px; /* Adjust margin for spacing */
+            border: none;
+            background-color: rgba(255, 255, 255, 0.1); /* Match form input style */
+            color: var(--chery-white);
+            cursor: pointer;
+            border-radius: 15px; /* Match form input style */
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .mode-btn.active,
+        .mode-btn:hover {
+            background-color: var(--chery-gold);
+            color: var(--chery-dark);
+            box-shadow: var(--shadow-medium);
+            transform: translateY(-2px);
+        }
+
+        .booking-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            color: var(--chery-dark); /* Text color for table content */
+            background: var(--chery-white); /* Background for the table */
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .booking-table th,
+        .booking-table td {
+            border: 1px solid #e2e8f0; /* Light border */
+            padding: 12px 15px;
+            text-align: left; /* Align text to left for better readability */
+        }
+
+        .booking-table th {
+            background-color: var(--chery-blue);
+            color: var(--chery-white);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .booking-table tr:nth-child(even) {
+            background-color: var(--chery-gray); /* Alternate row color */
+        }
+
+        .booking-table tr:hover {
+            background-color: rgba(30, 58, 138, 0.05); /* Hover effect */
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            margin: 0 4px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            background-color: #3b82f6; /* Blue */
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .delete-btn {
+            background-color: #ef4444; /* Red */
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="nav-container">
+            <div class="logo">Chery Arta</div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="#home" class="nav-link">Home</a></li>
+                    <li><a href="#facilities" class="nav-link">Fasilitas</a></li>
+                    <li><a href="#booking" class="nav-link">Book Service</a></li>
+                    <li><a href="#about" class="nav-link">About</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                    <li><a href="#" class="nav-link" onclick="showAdminLogin()">Admin</a></li>
+                </ul>
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-container">
+            <div class="hero-content" data-aos="fade-right">
+    <h2 class="hero-title-top">Book Your Chery</h2>
+    <h1 class="hero-title-bottom">Arta Service<br class="hero-break"> Today</h1>
+    
+    <p class="hero-description">Experience premium automotive service with our expert maintenance and repair solutions. Your car deserves the best care.</p>
+    
+    <a href="#booking" class="hero-cta">
+        <i class="fas fa-calendar-alt"></i>
+        Book Now
+    </a>
+</div>
+            
+        </div>
+    </section>
+
+    <!-- Facilities Slider dengan 8 Gambar Baru -->
+    <section class="facilities" id="facilities">
+        <div class="facilities-slider">
+            <h2 class="section-title" data-aos="fade-up">Fasilitas Kami</h2>
+            <div class="slider-container" data-aos="fade-up" data-aos-delay="200">
+                <div class="slider-track" id="sliderTrack">
+                    <!-- 1. Ruang Tunggu Sofa dengan Mural Pegunungan -->
+                    <div class="facility-card" onclick="openImageModal(0)">
+                        <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop&crop=center" alt="Ruang Tunggu Sofa dengan Mural Pegunungan" class="facility-image">
+                        <div class="facility-caption">
+                            <h3>Ruang Tunggu Premium</h3>
+                            <p>Ruang tunggu eksklusif dengan sofa nyaman dan mural pemandangan pegunungan yang menenangkan untuk kenyamanan Anda selama menunggu</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 2. Ruang Meeting dengan Meja dan Kursi -->
+                    <div class="facility-card" onclick="openImageModal(1)">
+                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop&crop=center" alt="Ruang Meeting dengan Meja dan Kursi" class="facility-image">
+                        <div class="facility-caption">
+                            <h3>Ruang Konsultasi</h3>
+                            <p>Ruang meeting modern untuk diskusi dan konsultasi mengenai perawatan kendaraan Anda dengan teknisi ahli kami</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 3. Area Meja Bulat dan Kursi Depan Tangga -->
+                    <div class="facility-card" onclick="openImageModal(2)">
+                        <img src="https://images.unsplash.com/photo-1497366412874-3415097a27e7?w=800&h=600&fit=crop&crop=center" alt="Area Meja Bulat dan Kursi Depan Tangga" class="facility-image">
+                        <div class="facility-caption">
+                            <h3>Area Diskusi Santai</h3>
+                            <p>Area santai dengan meja bulat yang nyaman untuk berdiskusi dengan keluarga sambil menunggu layanan selesai</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 4. Area Meja Customer Service -->
+                    <div class="facility-card" onclick="openImageModal(3)">
+                        <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&h=600&fit=crop&crop=center" alt="Area Meja Customer Service" class="facility-image">
+                        <div class="facility-caption">
+                            <h3>Customer Service Center</h3>
+                            <p>Meja pelayanan customer service yang profesional untuk membantu segala kebutuhan dan pertanyaan Anda</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 5. Playground Anak -->
+                    <div class="facility-card" onclick="openImageModal(4)">
+                        <img src="https://images.unsplash.com/photo-1544717302-de2939b7ef71?w=800&h=600&fit=crop&crop=center" alt="Playground Anak" class="facility-image">
+                        <div class="facility-caption">
+                            <h3>Kids Play Area</h3>
+                            <p>Area bermain anak yang aman dan menyenangkan, lengkap dengan permainan edukatif untuk menghibur si kecil</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 6. Bengkel Service Mobil -->
+                    <div class="facility-card" onclick="openImageModal(5)">
+                        <img src="https://images.unsplash.com/photo-1632823471565-1ecdf2f0d6e1?w=800&h=600&fit=crop&crop=center" alt="Bengkel Service Mobil" class="facility-image">
+                        <div class="facility-caption">
+                            <h3>Workshop Modern</h3>
+                            <p>Bengkel dengan teknologi terdepan dan peralatan canggih untuk memberikan layanan service terbaik bagi kendaraan Anda</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 7. Showroom Mobil Chery -->
+                    <div class="facility-card" onclick="openImageModal(6)">
+                        <img src="https://images.unsplash.com/photo-1562141961-d516843d4d71?w=800&h=600&fit=crop&crop=center" alt="Showroom Mobil Chery" class="facility-image">
+                        <div class="facility-caption">
+                            <h3>Showroom Chery</h3>
+                            <p>Showroom eksklusif yang menampilkan koleksi lengkap kendaraan Chery terbaru dengan desain interior yang elegan</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 8. Ruang Tunggu Sofa dengan TV -->
+                    <div class="facility-card" onclick="openImageModal(7)">
+                        <img src="https://images.unsplash.com/photo-1643712088866-b2d7b7f9b13e?w=800&h=600&fit=crop&crop=center" alt="Ruang Tunggu Sofa dengan TV" class="facility-image">
+                        <div class="facility-caption">
+                            <h3>Lounge Entertainment</h3>
+                            <p>Ruang tunggu VIP dengan sofa premium, TV layar lebar, dan hiburan untuk kenyamanan maksimal selama menunggu</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slider-controls">
+                <button class="slider-btn" onclick="previousSlide()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="slider-btn" onclick="nextSlide()">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="slider-indicators" id="sliderIndicators">
+                <div class="indicator active" onclick="goToSlide(0)"></div>
+                <div class="indicator" onclick="goToSlide(1)"></div>
+                <div class="indicator" onclick="goToSlide(2)"></div>
+                <div class="indicator" onclick="goToSlide(3)"></div>
+                <div class="indicator" onclick="goToSlide(4)"></div>
+                <div class="indicator" onclick="goToSlide(5)"></div>
+                <div class="indicator" onclick="goToSlide(6)"></div>
+                <div class="indicator" onclick="goToSlide(7)"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal Preview Gambar -->
+    <div class="image-modal" id="imageModal">
+        <div class="modal-image-container">
+            <button class="close-modal-btn" onclick="closeImageModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <button class="modal-nav-btn modal-prev" onclick="prevModalImage()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="modal-nav-btn modal-next" onclick="nextModalImage()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <img id="modalImage" class="modal-image" src="" alt="">
+            <div class="modal-caption">
+                <h3 id="modalTitle"></h3>
+                <p id="modalDescription"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Booking dengan Custom Scrollable Time Picker -->
+    <section class="booking" id="booking">
+        <div class="booking-container">
+            <div class="booking-card" data-aos="zoom-in">
+                <h2 class="booking-title">Book Your Service</h2>
+                <form id="bookingForm">
+                    <div class="form-group">
+                        <label class="form-label">Nama Lengkap</label>
+                        <div style="position: relative;">
+                            <i class="fas fa-user form-icon"></i>
+                            <input type="text" class="form-input" id="customerName" placeholder="Masukkan nama lengkap Anda" required>
+                            <div class="form-error">Nama lengkap harus diisi</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group plat-nomor-group">
+    <label for="kode-wilayah" class="form-label">NO POLISI</label>
+    <div class="plat-nomor-input-container">
+        <input type="text" id="kode-wilayah" name="kode_wilayah" 
+               maxlength="2" placeholder="B" 
+               class="input-box plat-part-a" 
+               oninput="this.value = this.value.toUpperCase()">
+        
+        <span class="separator">-</span>
+        
+        <input type="text" id="nomor-registrasi" name="nomor_registrasi" 
+               maxlength="4" placeholder="1764" 
+               class="input-box plat-part-b" 
+               oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+        
+        <span class="separator">-</span>
+        
+        <input type="text" id="kode-belakang" name="kode_belakang" 
+               maxlength="3" placeholder="KRS" 
+               class="input-box plat-part-c" 
+               oninput="this.value = this.value.toUpperCase()">
+    </div>
+    <div class="form-error">Plat nomor harus diisi dengan format yang benar</div>
+</div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nomor Telepon</label>
+                        <div style="position: relative;">
+                            <i class="fas fa-phone form-icon"></i>
+                            <input type="tel" class="form-input" id="phoneNumber" placeholder="Nomor Telepon" required>
+                            <div class="form-error">Nomor telepon harus diisi dengan format yang benar</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Type Mobil</label>
+                        <div style="position: relative;">
+                            <i class="fas fa-car form-icon"></i> <!-- Icon mobil -->
+                            <input type="text" class="form-input" id="carType" placeholder="Type Mobil" required>
+                            <div class="form-error">Type mobil harus diisi</div>
+                        </div>
+                    </div>
+                    
+                    <!-- DROPDOWN JENIS LAYANAN SAMA SEPERTI EMAIL BOX -->
+                    <div class="form-group">
+                        <label class="form-label">Jenis Layanan</label>
+                        <div class="service-select-wrapper" style="position: relative;">
+                            <i class="fas fa-cog form-icon"></i>
+                            <select class="form-input service-select" id="serviceType" required>
+                                <option value="">Pilih jenis layanan</option>
+                                <option value="Service Berkala">Service Berkala</option>
+                                <option value="Perbaikan Mesin">Perbaikan Mesin</option>
+                                <option value="Body Repair">Body Repair</option>
+                                <option value="AC Service">AC Service</option>
+                                <option value="Tune Up">Tune Up</option>
+                                <option value="Ganti Oli">Ganti Oli</option>
+                            </select>
+                            <div class="form-error">Pilih jenis layanan</div>
+                        </div>
+                    </div>
+                    
+                    <!-- INPUT TANGGAL BOOKING SAMA SEPERTI EMAIL BOX -->
+                    <div class="form-group">
+                        <label class="form-label">Tanggal Booking</label>
+                        <div class="date-input-wrapper" style="position: relative;">
+                            <i class="fas fa-calendar form-icon"></i>
+                            <input type="date" class="form-input" id="bookingDate" data-date="true" required>
+                            <div class="form-error">Pilih tanggal booking</div>
+                        </div>
+                    </div>
+                    
+                    <!-- CUSTOM SCROLLABLE TIME PICKER - UPDATED WITH FULL MINUTES 00-59 -->
+                    <div class="form-group">
+                        <label class="form-label">Waktu Booking</label>
+                        <div class="time-picker-wrapper" style="position: relative;">
+                            <i class="fas fa-clock form-icon"></i>
+                            <div class="time-picker-display" id="timePickerDisplay" data-time="true">
+                                <span id="selectedTime">Pilih waktu</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="time-picker-dropdown" id="timePickerDropdown">
+                                <div class="time-picker-content">
+                                    <!-- Hour Column -->
+                                    <div class="time-column">
+                                        <div class="time-column-label">Hour</div>
+                                        <div class="time-column-list" id="hourList">
+                                            <div class="time-option" data-hour="12">12</div>
+                                            <div class="time-option" data-hour="01">01</div>
+                                            <div class="time-option" data-hour="02">02</div>
+                                            <div class="time-option" data-hour="03">03</div>
+                                            <div class="time-option" data-hour="04">04</div>
+                                            <div class="time-option" data-hour="05">05</div>
+                                            <div class="time-option" data-hour="06">06</div>
+                                            <div class="time-option" data-hour="07">07</div>
+                                            <div class="time-option" data-hour="08">08</div>
+                                            <div class="time-option" data-hour="09">09</div>
+                                            <div class="time-option" data-hour="10">10</div>
+                                            <div class="time-option" data-hour="11">11</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Minute Column - UPDATED: 00-59 COMPLETE -->
+                                    <div class="time-column">
+                                        <div class="time-column-label">Min</div>
+                                        <div class="time-column-list" id="minuteList">
+                                            <!-- Generate all minutes 00-59 dynamically in JavaScript -->
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- AM/PM Column -->
+                                    <div class="time-column">
+                                        <div class="time-column-label">Period</div>
+                                        <div class="time-column-list" id="periodList">
+                                            <div class="time-option" data-period="AM">AM</div>
+                                            <div class="time-option" data-period="PM">PM</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="time-picker-actions">
+                                    <button type="button" class="time-picker-btn cancel" id="timePickerCancel">Batal</button>
+                                    <button type="button" class="time-picker-btn confirm" id="timePickerConfirm">OK</button>
+                                </div>
+                            </div>
+                            <div class="form-error">Pilih waktu booking</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Catatan Tambahan</label>
+                        <div style="position: relative;">
+                            <i class="fas fa-comment form-icon"></i>
+                            <textarea class="form-input" id="notes" placeholder="Jelaskan keluhan atau kebutuhan khusus..." rows="3"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <div class="loading-spinner"></div>
+                        <i class="fas fa-paper-plane"></i>
+                        Submit Booking
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="about-container">
+            <div class="about-content" data-aos="fade-right">
+                <h2>Mengapa Memilih Chery Arta?</h2>
+                <p>Dengan pengalaman lebih dari 15 tahun di industri otomotif, Chery Arta telah menjadi pilihan utama untuk perawatan dan perbaikan kendaraan Anda. Kami berkomitmen memberikan layanan terbaik dengan teknologi terkini.</p>
+                <div class="about-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <span>Teknisi Bersertifikat</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <span>Peralatan Modern</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <span>Layanan Cepat</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <span>Garansi Kualitas</span>
+                    </div>
+                </div>
+            </div>
+            <div class="about-image" data-aos="fade-left">
+                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Workshop Illustration -->
+                    <defs>
+                        <linearGradient id="workshopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#dc2626;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <!-- Building -->
+                    <rect x="50" y="100" width="300" height="150" fill="url(#workshopGrad)" rx="10"/>
+                    <!-- Garage Door -->
+                    <rect x="80" y="150" width="80" height="100" fill="rgba(255,255,255,0.2)" rx="5"/>
+                    <rect x="240" y="150" width="80" height="100" fill="rgba(255,255,255,0.2)" rx="5"/>
+                    <!-- Windows -->
+                    <rect x="120" y="120" width="30" height="20" fill="rgba(255,255,255,0.3)" rx="3"/>
+                    <rect x="170" y="120" width="30" height="20" fill="rgba(255,255,255,0.3)" rx="3"/>
+                    <rect x="220" y="120" width="30" height="20" fill="rgba(255,255,255,0.3)" rx="3"/>
+                    <!-- Sign -->
+                    <rect x="140" y="80" width="120" height="30" fill="#fbbf24" rx="5"/>
+                    <text x="200" y="100" text-anchor="middle" fill="#1e293b" font-family="Arial" font-size="12" font-weight="bold">CHERY ARTA</text>
+                    <!-- Tools -->
+                    <circle cx="100" cy="180" r="8" fill="#fbbf24"/>
+                    <rect x="96" y="172" width="8" height="16" fill="#64748b"/>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="contact-container">
+            <h2 class="section-title" data-aos="fade-up">Hubungi Kami</h2>
+            
+            <div class="contact-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="contact-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <h3>Alamat</h3>
+                <p>Jl. Raya Service No. 123<br>Jakarta Selatan, 12345</p>
+            </div>
+
+            <div class="contact-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="contact-icon">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <h3>Telepon</h3>
+                <p>(021) 1234-5678<br>0812-3456-7890</p>
+            </div>
+
+            <div class="contact-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="contact-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h3>Email</h3>
+                <p>info@cheryarta.com<br>service@cheryarta.com</p>
+            </div>
+
+            <div class="contact-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="contact-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3>Jam Operasional</h3>
+                <p>Senin - Sabtu: 08:00 - 17:00<br>Minggu: Tutup</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Panel -->
+    <section class="admin-panel" id="adminPanel">
+        <div class="admin-container">
+            <div class="admin-header">
+                <h2 class="admin-title">Admin Panel - Data Booking</h2>
+                <div class="admin-actions">
+                    <button class="admin-btn export-btn" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i>
+                        Export Excel
+                    </button>
+                    <button class="admin-btn logout-btn" onclick="adminLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+            
+            <!-- NEW: Mode Toggle for Booking List -->
+            <div class="mode-toggle">
+                <button id="btnCustomer" class="mode-btn active">Customer Mode</button>
+                <button id="btnAdmin" class="mode-btn">Admin Mode</button>
+            </div>
+
+            <div class="bookings-table">
+                <table class="table" id="bookingsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Nama</th>
+                            <th>Mode</th>
+                            <th>Plat Nomor</th>
+                            <th>Service</th>
+                            <th>Keluhan</th>
+                            <th>Phone Number</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingsTableBody">
+                        <!-- Data akan dimuat dari Firebase atau array lokal -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeLoginModal()">&times;</button>
+            <h3 class="modal-title">Admin Login</h3>
+            <form id="loginForm">
+                <input type="email" class="modal-input" id="adminEmail" placeholder="Email" required>
+                <input type="password" class="modal-input" id="adminPassword" placeholder="Password" required>
+                <button type="submit" class="modal-btn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Konfirmasi Hapus</h3>
+            <p style="text-align: center; margin-bottom: 1.5rem;">Apakah Anda yakin ingin menghapus booking ini?</p>
+            <div style="display: flex; gap: 1rem;">
+                <button class="modal-btn" style="background: #64748b;" onclick="closeDeleteModal()">Batal</button>
+                <button class="modal-btn" style="background: var(--chery-red);" onclick="confirmDelete()">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div class="message" id="message"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">Chery Arta</div>
+            <p>&copy; 2024 Chery Arta. All rights reserved. Crafted with modern technology.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Global Variables
+        let currentSlide = 0;
+        let currentModalSlide = 0;
+        let currentBookingId = null;
+        let bookingsData = []; // This will now hold all bookings
+        let selectedTime = null;
+        let selectedHour = null;
+        let selectedMinute = null;
+        let selectedPeriod = null;
+
+        // NEW: Variables for booking list and mode toggle
+        let allBookings = []; // To store all bookings regardless of mode
+        let currentDisplayMode = 'Customer'; // Default display mode for the table
+        let editingBookingId = null; // To track which booking is being edited
+
+        // Data Fasilitas dengan 8 gambar baru
+        const facilitiesData = [
+            {
+                image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop&crop=center",
+                title: "Ruang Tunggu Premium",
+                description: "Ruang tunggu eksklusif dengan sofa nyaman dan mural pemandangan pegunungan yang menenangkan untuk kenyamanan Anda selama menunggu"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop&crop=center",
+                title: "Ruang Konsultasi",
+                description: "Ruang meeting modern untuk diskusi dan konsultasi mengenai perawatan kendaraan Anda dengan teknisi ahli kami"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1497366412874-3415097a27e7?w=800&h=600&fit=crop&crop=center",
+                title: "Area Diskusi Santai",
+                description: "Area santai dengan meja bulat yang nyaman untuk berdiskusi dengan keluarga sambil menunggu layanan selesai"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&h=600&fit=crop&crop=center",
+                title: "Customer Service Center",
+                description: "Meja pelayanan customer service yang profesional untuk membantu segala kebutuhan dan pertanyaan Anda"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1544717302-de2939b7ef71?w=800&h=600&fit=crop&crop=center",
+                title: "Kids Play Area",
+                description: "Area bermain anak yang aman dan menyenangkan, lengkap dengan permainan edukatif untuk menghibur si kecil"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1632823471565-1ecdf2f0d6e1?w=800&h=600&fit=crop&crop=center",
+                title: "Workshop Modern",
+                description: "Bengkel dengan teknologi terdepan dan peralatan canggih untuk memberikan layanan service terbaik bagi kendaraan Anda"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1562141961-d516843d4d71?w=800&h=600&fit=crop&crop=center",
+                title: "Showroom Chery",
+                description: "Showroom eksklusif yang menampilkan koleksi lengkap kendaraan Chery terbaru dengan desain interior yang elegan"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1643712088866-b2d7b7f9b13e?w=800&h=600&fit=crop&crop=center",
+                title: "Lounge Entertainment",
+                description: "Ruang tunggu VIP dengan sofa premium, TV layar lebar, dan hiburan untuk kenyamanan maksimal selama menunggu"
+            }
+        ];
+
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true
+        });
+
+        // Header Scroll Effect
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('header');
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth Scrolling for Navigation Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Slider Functions
+        function updateSlider() {
+            const track = document.getElementById('sliderTrack');
+            const indicators = document.querySelectorAll('.indicator');
+            
+            track.style.transform = `translateX(-${currentSlide * 100}%)`;
+            
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % facilitiesData.length;
+            updateSlider();
+        }
+
+        function previousSlide() {
+            currentSlide = (currentSlide - 1 + facilitiesData.length) % facilitiesData.length;
+            updateSlider();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlider();
+        }
+
+        // Auto-play slider
+        setInterval(nextSlide, 5000);
+
+        // Modal Image Functions
+        function openImageModal(slideIndex) {
+            currentModalSlide = slideIndex;
+            updateModalImage();
+            document.getElementById('imageModal').classList.add('show');
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.remove('show');
+        }
+
+        function updateModalImage() {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDescription = document.getElementById('modalDescription');
+            
+            const facility = facilitiesData[currentModalSlide];
+            modalImage.src = facility.image;
+            modalImage.alt = facility.title;
+            modalTitle.textContent = facility.title;
+            modalDescription.textContent = facility.description;
+        }
+
+        function nextModalImage() {
+            currentModalSlide = (currentModalSlide + 1) % facilitiesData.length;
+            updateModalImage();
+        }
+
+        function prevModalImage() {
+            currentModalSlide = (currentModalSlide - 1 + facilitiesData.length) % facilitiesData.length;
+            updateModalImage();
+        }
+
+        // Keyboard navigation for modal
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('imageModal');
+            if (modal.classList.contains('show')) {
+                if (e.key === 'Escape') {
+                    closeImageModal();
+                } else if (e.key === 'ArrowLeft') {
+                    prevModalImage();
+                } else if (e.key === 'ArrowRight') {
+                    nextModalImage();
+                }
+            }
+        });
+
+        // ========== GENERATE COMPLETE MINUTE OPTIONS (00-59) ========== 
+        function generateMinuteOptions() {
+            const minuteList = document.getElementById('minuteList');
+            minuteList.innerHTML = ''; // Clear existing content
+            
+            // Generate minutes from 00 to 59
+            for (let i = 0; i <= 59; i++) {
+                const minute = i.toString().padStart(2, '0'); // Format with leading zero
+                const minuteOption = document.createElement('div');
+                minuteOption.className = 'time-option';
+                minuteOption.dataset.minute = minute;
+                minuteOption.textContent = minute;
+                minuteList.appendChild(minuteOption);
+            }
+        }
+
+        // ========== CUSTOM SCROLLABLE TIME PICKER FUNCTIONS ========== 
+        function initScrollableTimePicker() {
+            const timeDisplay = document.getElementById('timePickerDisplay');
+            const timeDropdown = document.getElementById('timePickerDropdown');
+            const cancelBtn = document.getElementById('timePickerCancel');
+            const confirmBtn = document.getElementById('timePickerConfirm');
+
+            // Generate minute options on initialization
+            generateMinuteOptions();
+
+            // Toggle dropdown
+            timeDisplay.addEventListener('click', (e) => {
+                e.stopPropagation();
+                timeDropdown.classList.toggle('show');
+                timeDisplay.classList.toggle('active');
+            });
+
+            // Hour selection
+            document.addEventListener('click', (e) => {
+                if (e.target.hasAttribute('data-hour')) {
+                    document.querySelectorAll('[data-hour]').forEach(opt => opt.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    selectedHour = e.target.dataset.hour;
+                }
+            });
+
+            // Minute selection - Updated to handle dynamically generated options
+            document.addEventListener('click', (e) => {
+                if (e.target.hasAttribute('data-minute')) {
+                    document.querySelectorAll('[data-minute]').forEach(opt => opt.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    selectedMinute = e.target.dataset.minute;
+                }
+            });
+
+            // Period selection
+            document.addEventListener('click', (e) => {
+                if (e.target.hasAttribute('data-period')) {
+                    document.querySelectorAll('[data-period]').forEach(opt => opt.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    selectedPeriod = e.target.dataset.period;
+                }
+            });
+
+            // Cancel button
+            cancelBtn.addEventListener('click', () => {
+                timeDropdown.classList.remove('show');
+                timeDisplay.classList.remove('active');
+                // Reset selections
+                selectedHour = null;
+                selectedMinute = null;
+                selectedPeriod = null;
+                document.querySelectorAll('.time-option').forEach(opt => opt.classList.remove('selected'));
+            });
+
+            // Confirm button
+            confirmBtn.addEventListener('click', () => {
+                if (selectedHour && selectedMinute && selectedPeriod) {
+                    const timeString = `${selectedHour}:${selectedMinute} ${selectedPeriod}`;
+                    selectedTime = timeString;
+                    document.getElementById('selectedTime').textContent = timeString;
+                    timeDropdown.classList.remove('show');
+                    timeDisplay.classList.remove('active');
+                } else {
+                    showMessage('Mohon pilih jam, menit, dan AM/PM', 'error');
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!timeDisplay.contains(e.target) && !timeDropdown.contains(e.target)) {
+                    timeDropdown.classList.remove('show');
+                    timeDisplay.classList.remove('active');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const partA = document.getElementById('kode-wilayah');
+            const partB = document.getElementById('nomor-registrasi');
+            const partC = document.getElementById('kode-belakang');
+
+            // Fungsi untuk memindahkan fokus ke input berikutnya
+            const autoTab = (currentInput, nextInput) => {
+                if (currentInput.value.length >= currentInput.maxLength) {
+                    if (nextInput) {
+                        nextInput.focus();
+                    }
+                }
+            };
+
+            partA.addEventListener('input', () => autoTab(partA, partB));
+            partB.addEventListener('input', () => autoTab(partB, partC));
+            // Tidak perlu listener untuk partC karena itu adalah input terakhir
+        });
+
+        // Form Validation
+        function validateField(field) {
+            const value = field.value.trim();
+            let isValid = true;
+
+            field.classList.remove('error');
+
+            switch(field.type) {
+                case 'tel':
+                    const phoneRegex = /^(\+62|62|0)[8-9][0-9]{7,11}$/;
+                    isValid = phoneRegex.test(value.replace(/\s/g, ''));
+                    break;
+                default:
+                    isValid = value.length > 0;
+            }
+
+            if (!isValid) {
+                field.classList.add('error');
+            }
+
+            return isValid;
+        }
+
+        // Real-time validation
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('blur', () => validateField(input));
+            input.addEventListener('input', () => {
+                if (input.classList.contains('error')) {
+                    validateField(input);
+                }
+            });
+        });
+
+        // Set minimum date to today
+        document.getElementById('bookingDate').min = new Date().toISOString().split('T')[0];
+
+        // Form Submission
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.querySelector('.submit-btn');
+            const form = e.target;
+            
+            // Validate all fields
+            let isFormValid = true;
+            form.querySelectorAll('.form-input').forEach(input => {
+                if (input.hasAttribute('required') && !validateField(input)) {
+                    isFormValid = false;
+                }
+            });
+
+            // Validate time picker
+            if (!selectedTime) {
+                showMessage('Mohon pilih waktu booking', 'error');
+                isFormValid = false;
+            }
+
+            if (!isFormValid) {
+                showMessage('Mohon perbaiki data yang tidak valid', 'error');
+                return;
+            }
+
+            // Show loading state
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            try {
+                // Prepare booking data
+                const bookingData = {
+                    customerName: document.getElementById('customerName').value,
+                    phoneNumber: document.getElementById('phoneNumber').value,
+                    carType: document.getElementById('carType').value,
+                    serviceType: document.getElementById('serviceType').value,
+                    bookingDate: document.getElementById('bookingDate').value,
+                    bookingTime: selectedTime,
+                    notes: document.getElementById('notes').value,
+                    status: 'Pending',
+                    createdAt: new Date().toISOString(),
+                    // NEW: Add mode to booking data
+                    mode: currentDisplayMode // Save with the current display mode (Customer/Admin)
+                };
+
+                // Construct platNomor from individual inputs
+                const platNomor = [
+                    document.getElementById('kode-wilayah').value.toUpperCase(),
+                    document.getElementById('nomor-registrasi').value,
+                    document.getElementById('kode-belakang').value.toUpperCase()
+                ].join('-');
+                bookingData.platNomor = platNomor; // Add platNomor to bookingData
+
+                // Save to Firebase
+                if (window.db && window.firebaseModules) {
+                    await window.firebaseModules.addDoc(
+                        window.firebaseModules.collection(window.db, 'bookings'), 
+                        bookingData
+                    );
+                    
+                    showMessage('Booking berhasil disimpan! Kami akan segera menghubungi Anda.', 'success');
+                    form.reset();
+                    selectedTime = null;
+                    selectedHour = null;
+                    selectedMinute = null;
+                    selectedPeriod = null;
+                    document.getElementById('selectedTime').textContent = 'Pilih waktu';
+                    document.querySelectorAll('.time-option').forEach(opt => opt.classList.remove('selected'));
+                    
+                    // NEW: Reload bookings for the admin panel
+                    if (document.getElementById('adminPanel').classList.contains('show')) {
+                        loadBookings();
+                    }
+                } else {
+                    // Fallback: simulate success
+                    setTimeout(() => {
+                        showMessage('Booking berhasil disimpan! Kami akan segera menghubungi Anda.', 'success');
+                        form.reset();
+                        selectedTime = null;
+                        selectedHour = null;
+                        selectedMinute = null;
+                        selectedPeriod = null;
+                        document.getElementById('selectedTime').textContent = 'Pilih waktu';
+                        document.querySelectorAll('.time-option').forEach(opt => opt.classList.remove('selected'));
+
+                        // NEW: Add to local allBookings array for demo
+                        const newId = allBookings.length ? Math.max(...allBookings.map(b => b.id)) + 1 : 1;
+                        allBookings.push({ id: newId, ...bookingData });
+                        renderBookingsTable(); // Re-render the table
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('Error saving booking:', error);
+                showMessage('Terjadi kesalahan. Silakan coba lagi.', 'error');
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Admin Functions
+        function showAdminLogin() {
+            document.getElementById('loginModal').classList.add('show');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('show');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+            currentBookingId = null;
+        }
+
+        // Admin Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+
+            try {
+                if (window.auth && window.firebaseModules) {
+                    await window.firebaseModules.signInWithEmailAndPassword(window.auth, email, password);
+                } else {
+                    // Fallback authentication
+                    if (email === 'admin@cheryarta.com' && password === 'admin123') {
+                        showAdminPanel();
+                        closeLoginModal();
+                        showMessage('Login berhasil!', 'success');
+                    } else {
+                        throw new Error('Invalid credentials');
+                    }
+                }
+            } catch (error) {
+                showMessage('Email atau password salah', 'error');
+            }
+        });
+
+        // Firebase Auth State Observer
+        if (window.auth && window.firebaseModules) {
+            window.firebaseModules.onAuthStateChanged(window.auth, (user) => {
+                if (user) {
+                    showAdminPanel();
+                    closeLoginModal();
+                    showMessage('Login berhasil!', 'success');
+                    loadBookings();
+                } else {
+                    hideAdminPanel(); // Hide admin panel if logged out
+                }
+            });
+        }
+
+        function showAdminPanel() {
+            document.getElementById('adminPanel').classList.add('show');
+            document.querySelector('.hero').style.display = 'none';
+            document.querySelector('.facilities').style.display = 'none';
+            document.querySelector('.booking').style.display = 'none';
+            document.querySelector('.about').style.display = 'none';
+            document.querySelector('.contact').style.display = 'none';
+            // NEW: Ensure booking list is rendered when admin panel is shown
+            renderBookingsTable();
+        }
+
+        function hideAdminPanel() {
+            document.getElementById('adminPanel').classList.remove('show');
+            document.querySelector('.hero').style.display = 'block';
+            document.querySelector('.facilities').style.display = 'block';
+            document.querySelector('.booking').style.display = 'block';
+            document.querySelector('.about').style.display = 'block';
+            document.querySelector('.contact').style.display = 'block';
+        }
+
+        async function loadBookings() {
+            try {
+                if (window.db && window.firebaseModules) {
+                    const querySnapshot = await window.firebaseModules.getDocs(
+                        window.firebaseModules.collection(window.db, 'bookings')
+                    );
+                    
+                    allBookings = []; // Clear previous data
+                    querySnapshot.forEach((doc) => {
+                        allBookings.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                } else {
+                    // Sample data for demo if Firebase is not used
+                    if (allBookings.length === 0) { // Only load sample data if empty
+                        allBookings = [
+                            {
+                                id: '1',
+                                customerName: 'John Doe',
+                                phoneNumber: '08123456789',
+                                carType: 'Chery Omoda 5',
+                                serviceType: 'Service Berkala',
+                                bookingDate: '2024-01-15',
+                                bookingTime: '10:23 AM',
+                                notes: 'Ganti oli dan filter',
+                                status: 'Pending',
+                                createdAt: new Date().toISOString(),
+                                mode: 'Customer', // Sample mode
+                                platNomor: 'B-1234-ABC',
+                                keluhan: 'Mesin berisik'
+                            },
+                            {
+                                id: '2',
+                                customerName: 'Jane Smith',
+                                phoneNumber: '08765432100',
+                                carType: 'Chery Tiggo 7 Pro',
+                                serviceType: 'Perbaikan Mesin',
+                                bookingDate: '2024-01-16',
+                                bookingTime: '02:00 PM',
+                                notes: 'Cek suara aneh di mesin',
+                                status: 'Completed',
+                                createdAt: new Date().toISOString(),
+                                mode: 'Admin', // Sample mode
+                                platNomor: 'D-5678-XYZ',
+                                keluhan: 'Suara aneh di mesin'
+                            }
+                        ];
+                    }
+                }
+                
+                renderBookingsTable();
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                showMessage('Gagal memuat data booking', 'error');
+            }
+        }
+
+        function renderBookingsTable() {
+            const tbody = document.getElementById('bookingsTableBody');
+            tbody.innerHTML = '';
+
+            // Filter bookings based on currentDisplayMode
+            const filteredBookings = allBookings.filter(b => b.mode === currentDisplayMode);
+
+            if (filteredBookings.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align: center;">Tidak ada data booking untuk mode ${currentDisplayMode}.</td></tr>`;
+                return;
+            }
+
+            filteredBookings.forEach((booking) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${new Date(booking.bookingDate).toLocaleDateString('id-ID')}</td>
+                    <td>${booking.bookingTime}</td>
+                    <td>${booking.customerName}</td>
+                    <td>${booking.mode}</td>
+                    <td>${booking.platNomor || '-'}</td>
+                    <td>${booking.serviceType}</td>
+                    <td>${booking.notes || '-'}</td>
+                    <td>${booking.phoneNumber}</td>
+                    <td>
+                        <button class="action-btn edit-btn" data-id="${booking.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-btn" data-id="${booking.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Attach event listeners for new buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    const id = e.currentTarget.dataset.id;
+                    editBooking(id);
+                });
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    const id = e.currentTarget.dataset.id;
+                    deleteBookingConfirmation(id); // Use a different name to avoid conflict
+                });
+            });
+        }
+
+        // NEW: Function to handle editing a booking
+        function editBooking(id) {
+            const booking = allBookings.find(b => b.id === id);
+            if (!booking) {
+                showMessage('Booking tidak ditemukan!', 'error');
+                return;
+            }
+
+            editingBookingId = id; // Set the ID of the booking being edited
+
+            // Populate the booking form with the selected booking's data
+            document.getElementById('customerName').value = booking.customerName;
+            document.getElementById('phoneNumber').value = booking.phoneNumber;
+            document.getElementById('carType').value = booking.carType;
+            document.getElementById('serviceType').value = booking.serviceType;
+            document.getElementById('bookingDate').value = booking.bookingDate;
+            document.getElementById('notes').value = booking.notes || '';
+
+            // Populate plat nomor fields
+            const platParts = booking.platNomor ? booking.platNomor.split('-') : ['', '', ''];
+            document.getElementById('kode-wilayah').value = platParts[0];
+            document.getElementById('nomor-registrasi').value = platParts[1];
+            document.getElementById('kode-belakang').value = platParts[2];
+
+            // Populate time picker display
+            selectedTime = booking.bookingTime;
+            document.getElementById('selectedTime').textContent = booking.bookingTime;
+            // You might want to also set selectedHour, selectedMinute, selectedPeriod if the time picker is complex
+            // For simplicity, we just set the display text here.
+
+            // Change submit button text to indicate update mode
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.innerHTML = `<div class="loading-spinner"></div><i class="fas fa-save"></i> Update Booking`;
+            
+            // Scroll to the booking form
+            document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // NEW: Modified form submission to handle updates
+        document.getElementById('bookingForm').removeEventListener('submit', async (e) => { /* ... existing code ... */ }); // Remove old listener
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.querySelector('.submit-btn');
+            const form = e.target;
+            
+            let isFormValid = true;
+            form.querySelectorAll('.form-input').forEach(input => {
+                if (input.hasAttribute('required') && !validateField(input)) {
+                    isFormValid = false;
+                }
+            });
+
+            if (!selectedTime) {
+                showMessage('Mohon pilih waktu booking', 'error');
+                isFormValid = false;
+            }
+
+            if (!isFormValid) {
+                showMessage('Mohon perbaiki data yang tidak valid', 'error');
+                return;
+            }
+
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            try {
+                const bookingData = {
+                    customerName: document.getElementById('customerName').value,
+                    phoneNumber: document.getElementById('phoneNumber').value,
+                    carType: document.getElementById('carType').value,
+                    serviceType: document.getElementById('serviceType').value,
+                    bookingDate: document.getElementById('bookingDate').value,
+                    bookingTime: selectedTime,
+                    notes: document.getElementById('notes').value,
+                    status: 'Pending', // Default status for new/updated bookings
+                    mode: currentDisplayMode // Assign mode based on current display mode
+                };
+
+                const platNomor = [
+                    document.getElementById('kode-wilayah').value.toUpperCase(),
+                    document.getElementById('nomor-registrasi').value,
+                    document.getElementById('kode-belakang').value.toUpperCase()
+                ].join('-');
+                bookingData.platNomor = platNomor;
+
+                if (editingBookingId) {
+                    // Update existing booking
+                    if (window.db && window.firebaseModules) {
+                        await window.firebaseModules.updateDoc(
+                            window.firebaseModules.doc(window.db, 'bookings', editingBookingId),
+                            bookingData
+                        );
+                        showMessage('Booking berhasil diupdate!', 'success');
+                    } else {
+                        // Fallback for local array
+                        const index = allBookings.findIndex(b => b.id === editingBookingId);
+                        if (index !== -1) {
+                            allBookings[index] = { ...allBookings[index], ...bookingData };
+                        }
+                        showMessage('Booking berhasil diupdate (lokal)!', 'success');
+                    }
+                } else {
+                    // Add new booking
+                    bookingData.createdAt = new Date().toISOString();
+                    if (window.db && window.firebaseModules) {
+                        await window.firebaseModules.addDoc(
+                            window.firebaseModules.collection(window.db, 'bookings'), 
+                            bookingData
+                        );
+                        showMessage('Booking berhasil disimpan!', 'success');
+                    } else {
+                        // Fallback for local array
+                        const newId = allBookings.length ? Math.max(...allBookings.map(b => b.id)) + 1 : 1;
+                        allBookings.push({ id: newId, ...bookingData });
+                        showMessage('Booking berhasil disimpan (lokal)!', 'success');
+                    }
+                }
+                
+                form.reset();
+                selectedTime = null;
+                document.getElementById('selectedTime').textContent = 'Pilih waktu';
+                document.querySelectorAll('.time-option').forEach(opt => opt.classList.remove('selected'));
+                editingBookingId = null; // Reset editing state
+                submitBtn.innerHTML = `<div class="loading-spinner"></div><i class="fas fa-paper-plane"></i> Submit Booking`; // Reset button text
+                
+                loadBookings(); // Reload and re-render the table
+            } catch (error) {
+                console.error('Error saving/updating booking:', error);
+                showMessage('Terjadi kesalahan. Silakan coba lagi.', 'error');
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+        });
+
+
+        // NEW: Function to handle delete confirmation (renamed to avoid conflict)
+        function deleteBookingConfirmation(id) {
+            currentBookingId = id; // Use currentBookingId for the modal
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        // Original confirmDelete function will now use currentBookingId
+        async function confirmDelete() {
+            if (!currentBookingId) return;
+
+            try {
+                if (window.db && window.firebaseModules) {
+                    await window.firebaseModules.deleteDoc(
+                        window.firebaseModules.doc(window.db, 'bookings', currentBookingId)
+                    );
+                } else {
+                    // Fallback for local array
+                    allBookings = allBookings.filter(b => b.id !== currentBookingId);
+                }
+                
+                loadBookings(); // Reload and re-render the table
+                closeDeleteModal();
+                showMessage('Booking berhasil dihapus', 'success');
+            } catch (error) {
+                console.error('Error deleting booking:', error);
+                showMessage('Gagal menghapus booking', 'error');
+            }
+        }
+
+        function exportToExcel() {
+            if (allBookings.length === 0) {
+                showMessage('Tidak ada data untuk diekspor', 'error');
+                return;
+            }
+
+            const exportData = allBookings.map((booking) => ({
+                'ID': booking.id,
+                'Date': new Date(booking.bookingDate).toLocaleDateString('id-ID'),
+                'Time': booking.bookingTime,
+                'Nama': booking.customerName,
+                'Mode': booking.mode,
+                'Plat Nomor': booking.platNomor || '-',
+                'Service': booking.serviceType,
+                'Keluhan': booking.notes || '-',
+                'Phone Number': booking.phoneNumber,
+                'Status': booking.status,
+                'Tanggal Dibuat': new Date(booking.createdAt).toLocaleString('id-ID')
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Data Booking');
+
+            const fileName = `booking-chery-arta-${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            showMessage('Data berhasil diekspor ke Excel', 'success');
+        }
+
+        async function adminLogout() {
+            try {
+                if (window.auth && window.firebaseModules) {
+                    await window.firebaseModules.signOut(window.auth);
+                }
+                
+                hideAdminPanel();
+                showMessage('Logout berhasil', 'success');
+            } catch (error) {
+                console.error('Error logging out:', error);
+                showMessage('Gagal logout', 'error');
+            }
+        }
+
+        // Utility Functions
+        function showMessage(text, type) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.className = `message ${type} show`;
+            
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 4000);
+        }
+
+        // Mobile Menu (if needed)
+        document.querySelector('.mobile-menu-btn').addEventListener('click', () => {
+            const navMenu = document.querySelector('.nav-menu');
+            navMenu.style.display = navMenu.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        // Close modals when clicking outside
+        document.addEventListener('click', (e) => {
+            const loginModal = document.getElementById('loginModal');
+            const deleteModal = document.getElementById('deleteModal');
+            const imageModal = document.getElementById('imageModal');
+            
+            if (e.target === loginModal) {
+                closeLoginModal();
+            }
+            if (e.target === deleteModal) {
+                closeDeleteModal();
+            }
+            if (e.target === imageModal) {
+                closeImageModal();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set today as minimum date for booking
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('bookingDate').setAttribute('min', today);
+            
+            // Initialize slider
+            updateSlider();
+            
+            // Initialize custom scrollable time picker with complete minutes
+            initScrollableTimePicker();
+
+            // NEW: Initialize mode toggle buttons
+            const btnCustomer = document.getElementById('btnCustomer');
+            const btnAdmin = document.getElementById('btnAdmin');
+
+            btnCustomer.addEventListener('click', () => {
+                currentDisplayMode = 'Customer';
+                btnCustomer.classList.add('active');
+                btnAdmin.classList.remove('active');
+                renderBookingsTable();
+            });
+
+            btnAdmin.addEventListener('click', () => {
+                currentDisplayMode = 'Admin';
+                btnAdmin.classList.add('active');
+                btnCustomer.classList.remove('active');
+                renderBookingsTable();
+            });
+
+            // Load bookings initially (this will also render the table)
+            loadBookings();
+        });
+    </script>
+
+    <script type="module">
+  import { signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+    from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+  const auth = window.auth; 
+  const loginForm = document.getElementById("loginForm");
+  const loginModal = document.getElementById("loginModal");
+  const adminPanel = document.getElementById("adminPanel");
+  const messageBox = document.getElementById("message");
+
+  // --- LOGIN ---
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("adminEmail").value;
+    const password = document.getElementById("adminPassword").value;
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      showMessage("Login berhasil!", "success");
+      loginModal.classList.remove("show");
+      adminPanel.classList.add("show");
+      // NEW: Load bookings after successful login
+      window.loadBookings(); 
+    } catch (error) {
+      showMessage("Login gagal: " + error.message, "error");
+      console.error(error);
+    }
+  });
+
+  // --- LOGOUT ---
+  window.adminLogout = async () => {
+    try {
+      await signOut(auth);
+      showMessage("Logout berhasil!", "success");
+      adminPanel.classList.remove("show");
+      // NEW: Hide other sections when logging out
+      document.querySelector('.hero').style.display = 'block';
+      document.querySelector('.facilities').style.display = 'block';
+      document.querySelector('.booking').style.display = 'block';
+      document.querySelector('.about').style.display = 'block';
+      document.querySelector('.contact').style.display = 'block';
+    } catch (error) {
+      showMessage("Logout gagal: " + error.message, "error");
+      console.error(error);
+    }
+  };
+
+  // --- CEK STATUS LOGIN ---
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      adminPanel.classList.add("show");
+      // NEW: Hide other sections when logged in
+      document.querySelector('.hero').style.display = 'none';
+      document.querySelector('.facilities').style.display = 'none';
+      document.querySelector('.booking').style.display = 'none';
+      document.querySelector('.about').style.display = 'none';
+      document.querySelector('.contact').style.display = 'none';
+      // NEW: Load bookings when admin panel is shown
+      window.loadBookings(); 
+    } else {
+      adminPanel.classList.remove("show");
+      // NEW: Show other sections when logged out
+      document.querySelector('.hero').style.display = 'block';
+      document.querySelector('.facilities').style.display = 'block';
+      document.querySelector('.booking').style.display = 'block';
+      document.querySelector('.about').style.display = 'block';
+      document.querySelector('.contact').style.display = 'block';
+    }
+  });
+
+  // --- TAMPILKAN PESAN ---
+  function showMessage(text, type) {
+    messageBox.textContent = text;
+    messageBox.className = "message " + type + " show";
+    setTimeout(() => {
+      messageBox.classList.remove("show");
+    }, 3000);
+  }
+</script>
+
+</body>
+</html>
+
